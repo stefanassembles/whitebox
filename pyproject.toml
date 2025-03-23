@@ -1,0 +1,13 @@
+[project]
+name = "whitebox"
+version = "0.1.0"
+dependencies = [
+    "transformers",
+    "tokenizers",
+    "accelerate",
+    "datasets",
+    "torch",
+    "scikit-learn",
+]
+requires-python  = ">=3.13.2"
+
