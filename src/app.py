@@ -5,7 +5,9 @@ from transformers import (
     Trainer,
     TrainingArguments,
 )
-from tokenizers import Tokenizer, models, pre_tokenizers, trainers
+from tokenizers import Tokenizer, models, pre_tokenizers, decoders, trainers, processors
+from tokenizers.pre_tokenizers import BertPreTokenizer
+
 from datasets import Dataset
 import numpy as np
 from sklearn.metrics import accuracy_score
@@ -15,15 +17,24 @@ texts = ["true", "false"]
 labels = [1, 0]
 
 # 2. Tokenizer (WordLevel from scratch)
-tokenizer_model = models.WordLevel(vocab={}, unk_token="[UNK]")
+tokenizer_model = models.WordPiece(vocab={}, unk_token="[UNK]")
 tokenizer = Tokenizer(tokenizer_model)
-tokenizer.pre_tokenizer = pre_tokenizers.Whitespace()
+tokenizer.pre_tokenizer = pre_tokenizers.BertPreTokenizer()
 
 tokenizer.train_from_iterator(
     texts,
-    trainer=trainers.WordLevelTrainer(
-        special_tokens=["[PAD]", "[UNK]", "[CLS]", "[SEP]"]
+    trainer=trainers.WordPieceTrainer(
+        vocab_size=100, special_tokens=["[PAD]", "[UNK]", "[CLS]", "[SEP]"]
     ),
+)
+
+tokenizer.decoder = decoders.WordPiece(prefix="##")
+tokenizer.post_processor = processors.TemplateProcessing(
+    single="[CLS] $A [SEP]",
+    special_tokens=[
+        ("[CLS]", tokenizer.token_to_id("[CLS]")),
+        ("[SEP]", tokenizer.token_to_id("[SEP]")),
+    ],
 )
 
 hf_tokenizer = PreTrainedTokenizerFast(
