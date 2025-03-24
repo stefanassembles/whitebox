@@ -45,6 +45,8 @@ hf_tokenizer = PreTrainedTokenizerFast(
     sep_token="[SEP]",
 )
 
+hf_tokenizer.save_pretrained("/tmp")
+
 
 # 3. Tokenize
 def tokenize(example):
